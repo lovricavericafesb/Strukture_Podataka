@@ -52,8 +52,6 @@ int main(void)
 	printf("\n");
 
 	Unija(head1, head2, head3);
-	//ispis(head3);
-	//sortList(head3);
 	printf("\nUnija:");
 	printf("\n");
 	ispis(head3);
@@ -63,11 +61,7 @@ int main(void)
 	Presjek(head1, head2, head4);
 	printf("Presjek:\n");
 	ispis(head4);
-	//sortList(head4);
-	//printf("\n");
-	//ispis(head4);
-
-	//system("pause");
+	
 	return 0;
 }
 int input(list head) {
