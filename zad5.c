@@ -186,7 +186,7 @@ int Unija(list head1, list head2, list head3) {
 	temp1 = head1->next;
 	temp2 = head2->next;
 
-	while (temp1 == NULL || temp2 == NULL) {
+	while (temp1 != NULL || temp2 != NULL) {
 		if (temp1->element == temp2->element) {
 			createUnija(temp1->element, head3);
 			temp1 = temp1->next;
