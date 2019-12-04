@@ -7,7 +7,7 @@
 typedef struct Stog* Cvor;
 typedef struct Stog {
 	int element;
-	Cvor* next;
+	Cvor next;
 }Stog;
 
 int push(int El, Cvor S);
