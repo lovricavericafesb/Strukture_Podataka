@@ -1,237 +1,190 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
-#include <string.h>
-#include <malloc.h>
 #include <stdlib.h>
+#include <malloc.h>
+#include <string.h>
+#include <ctype.h>
+#define MAX_LINE 25
 
-#define ERROR -1
-#define SUCCES 0
+struct Lista;
+typedef struct Lista* lista;
+typedef struct Lista {
+	int el;
+	lista next;
+}Lista;
 
-typedef struct List;
-typedef struct List* list;
-typedef struct List {
-	int element;
-	int br_element;
-	list next;
-}List;
+int CitajIzDat(lista head);
+int Stvori_Clan(lista head);
+int ispis(lista head);
+int Unija(lista head1, lista head2, lista headU);
+int Stvori_Uniju(int element, lista headU);
+int Presjek(lista head1, lista head2, lista headP);
 
-int input(list);
-int createElement(list, int);
-int sortList(list);
-int switchElements(list, list, list);
-int ispis(list);
-int Unija(list, list, list);
-int Presjek(list, list, list);
-int createUnija(int, list);
-int main(void)
+int main()
 {
-	list head1;
-	list head2;
-	list head3;
-	list head4;
+	lista head1;
+	lista head2;
+	lista head_Unija;
+	lista head_Presjek;
 
-	head1 = (list)malloc(sizeof(List));
-	head2 = (list)malloc(sizeof(List));
-	head3 = (list)malloc(sizeof(List));
-	head4 = (list)malloc(sizeof(List));
+	head1 = (lista)malloc(sizeof(Lista));
+	head2 = (lista)malloc(sizeof(Lista));
+	head_Unija = (lista)malloc(sizeof(Lista));
+	head_Presjek = (lista)malloc(sizeof(Lista));
 
 	head1->next = NULL;
 	head2->next = NULL;
-	head3->next = NULL;
-	head4->next = NULL;
+	head_Unija->next = NULL;
+	head_Presjek->next = NULL;
 
-	input(head1);
-	input(head2);
+	CitajIzDat(head1);
+	CitajIzDat(head2);
 
-	sortList(head1);
-	sortList(head2);
-
+	printf("\nPrva lista: ");
 	ispis(head1);
-	printf("\n------------------------------------------------------------\n");
+	printf("\n*************************************************************\n");
+	printf("Druga lista: ");
 	ispis(head2);
+	printf("\n*************************************************************\n");
+	
+	Unija(head1, head2, head_Unija);
+	printf("Unija: ");
+	ispis(head_Unija);
+	printf("\n*************************************************************\n");
+
+	Presjek(head1, head2, head_Presjek);
+	printf("Presjek: ");
+	ispis(head_Presjek);
 	printf("\n");
 
-	Unija(head1, head2, head3);
-	printf("\nUnija:");
-	printf("\n");
-	ispis(head3);
-	printf("\n");
-	printf("______________________________________\n");
-	
-	Presjek(head1, head2, head4);
-	printf("Presjek:\n");
-	ispis(head4);
-	
 	return 0;
 }
-int input(list head) {
-	int i = 0;
+int CitajIzDat(lista head)
+{
+	lista novi_clan;
 
-	printf("Input number of elements: ");
-	scanf(" %d", &(head->br_element));
+	char* filename;
+    filename = (char*)malloc(sizeof(char) * MAX_LINE);
 
-	for (i = 0; i < head->br_element; i++) {
-		createElement(head, i);
+	FILE* fp = NULL;
+	
+	printf("\nUnesite ime datoteke u kojoj se nalaze liste: ");
+	scanf(" %s", filename);
+
+	if (strchr(filename, '.') == NULL) {
+		strcat(filename, ".txt");
 	}
 
+	fp = fopen(filename, "r");
+	if (fp == NULL) {
+		printf("Nije moguce otvoriti upisanu datoteku!");
+		return 0;
+	}
 
-	return SUCCES;
+	while (!feof(fp)) {
+		novi_clan = Stvori_Clan(head);
+		fscanf(fp ," %d", &novi_clan->el);
+	}
+
+	fclose(fp);
+
+	return 0;
 }
-int createElement(list head, int i) {
-	list temp;
-	temp = (list)malloc(sizeof(List));
+int Stvori_Clan(lista head)
+{
+	lista novi_clan, temp1;
+	novi_clan = (lista)malloc(sizeof(Lista));
 
-	temp->next = head->next;
-	head->next = temp;
+	temp1 = head;
 
-	printf("\nInput %d element: ", i + 1);
-	scanf(" %d", &(temp->element));
-	printf("\n");
+	while (temp1->next != NULL)
+		temp1 = temp1->next;
 
-	return SUCCES;
+	novi_clan->next = temp1->next;
+	temp1->next = novi_clan;
+	
+	return novi_clan;
 }
-int sortList(list head) {
-	list temp1;
-	list temp2;
-	list temp3;
-	temp1 = (list)malloc(sizeof(List));
-	temp2 = (list)malloc(sizeof(List));
-	temp3 = (list)malloc(sizeof(List));
-
+int ispis(lista head)
+{
+	lista temp1;
 	temp1 = head->next;
-	temp2 = temp1->next;
-	temp3 = temp1;
-
-	while (temp1->next != NULL) {
-		while (temp2 != NULL) {
-			if (temp1->element < temp2->element)
-				switchElements(temp1, temp2, head);
-			else
-				temp2 = temp2->next;
-		}
-		temp3 = temp3->next;
-		temp1 = temp3;
-		temp2 = temp1->next;
+	
+	if (temp1 == NULL) {
+		printf("\nLista je prazna!\n");
+		return 0;
 	}
 
-	return SUCCES;
+	while (temp1 != NULL)
+	{
+		printf("\t%d", temp1->el);
+		temp1 = temp1->next;
+	}
+
+	return 0;
+	
 }
-int switchElements(list temp1, list temp2, list head)
+int Unija(lista head1, lista head2, lista headU)
 {
-	list prev1;
-	list prev2;
-	list temp3;
-	list temp4;
+	lista temp1 = head1->next, temp2 = head2->next;
 
-	prev1 = (list)malloc(sizeof(List));
-	prev2 = (list)malloc(sizeof(List));
-	temp3 = (list)malloc(sizeof(List));
-	temp4 = (list)malloc(sizeof(List));
-
-	prev1 = head;
-	prev2 = head;
-
-	while (prev1->next != temp1)
-		prev1 = prev1->next;
-	while (prev2->next != temp2)
-		prev2 = prev2->next;
-
-	if (temp1->next == temp2) {
-		prev1->next = temp2;
-		temp3->next = temp2->next;
-		temp2->next = temp1->next;
-		temp1->next = temp3->next;
-		return SUCCES;
-	}
-	else if (temp2->next == temp1) {
-		prev2->next = temp1;
-		temp3->next = temp1->next;
-		temp1->next = temp2->next;
-		temp2->next = temp3->next;
-		return SUCCES;
-	}
-	else {
-		temp4->next = prev1->next;
-		prev1->next = prev2->next;
-		prev2->next = temp4->next;
-
-		temp3->next = temp1->next;
-		temp1->next = temp2->next;
-		temp2->next = temp3->next;
-		return SUCCES;
-	}
-
-	return ERROR;
-
-}
-int ispis(list head)
-{
-	list temp;
-	temp = (list)malloc(sizeof(List));
-
-	temp = head->next;
-	while (temp != NULL) {
-		printf("%d\t", temp->element);
-		temp = temp->next;
-	}
-	return SUCCES;
-}
-int Unija(list head1, list head2, list head3) {
-	list temp1;
-	list temp2;
-
-	temp1 = (list)malloc(sizeof(List));
-	temp2 = (list)malloc(sizeof(List));
-
-	temp1 = head1->next;
-	temp2 = head2->next;
-
-	while (temp1 != NULL || temp2 != NULL) {
-		if (temp1->element == temp2->element) {
-			createUnija(temp1->element, head3);
+	while (temp1 != NULL && temp2 != NULL)
+	{
+		if (temp1->el == temp2->el) {
+			Stvori_Uniju(temp1->el, headU);
 			temp1 = temp1->next;
 			temp2 = temp2->next;
 		}
-		else if (temp1->element > temp2->element) {
-			createUnija(temp1->element, head3);
+		else if (temp1->el < temp2->el) {
+			Stvori_Uniju(temp1->el, headU);
 			temp1 = temp1->next;
 		}
 		else {
-			createUnija(temp2->element, head3);
+			Stvori_Uniju(temp2->el, headU);
 			temp2 = temp2->next;
 		}
-
 	}
-	return SUCCES;
+	if (temp1 != NULL) {
+		while (temp1 != NULL) {
+			Stvori_Uniju(temp1->el, headU);
+			temp1 = temp1->next;
+		}
+	}
+	else if (temp2 != NULL) {
+		while (temp2 != NULL) {
+			Stvori_Uniju(temp2->el, headU);
+			temp2 = temp2->next;
+		}
+	}
+
+	return 0;
 }
+int Stvori_Uniju(int element, lista headU)
+{
+	lista novi_clan, temp;
+	novi_clan = (lista)malloc(sizeof(Lista));
 
-int createUnija(int el, list head) {
-	list temp;
-	temp = (list)malloc(sizeof(List));
+	temp = headU;
+	while (temp->next != NULL)
+		temp = temp->next;
 
-	temp->element = el;
-	temp->next = head->next;
-	head->next = temp;
+	novi_clan->next = temp->next;
+	temp->next = novi_clan;
+	novi_clan->el = element;
 
-
-	return SUCCES;
+	return 0;
+	
 }
-int Presjek(list head1, list head2, list head4) {
-	list temp1;
-	list temp2;
-
-	temp1 = (list)malloc(sizeof(List));
-	temp2 = (list)malloc(sizeof(List));
-
-	temp1 = head1->next;
-	temp2 = head2->next;
+int Presjek(lista head1, lista head2, lista headP)
+{
+	lista temp1 = head1->next, temp2 = head2->next;
 
 	while (temp1 != NULL) {
 		while (temp2 != NULL) {
-			if (temp1->element == temp2->element) {
-				createUnija(temp1->element, head4);
-				temp2 = temp2->next;
+			if (temp1->el == temp2->el) {
+				Stvori_Uniju(temp1->el, headP);
 				temp1 = temp1->next;
+				temp2 = temp2->next;
 			}
 			else
 				temp2 = temp2->next;
@@ -239,5 +192,6 @@ int Presjek(list head1, list head2, list head4) {
 		temp1 = temp1->next;
 		temp2 = head2->next;
 	}
-	return SUCCES;
+
+	return 0;
 }
