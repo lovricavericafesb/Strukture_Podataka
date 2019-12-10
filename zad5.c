@@ -4,7 +4,7 @@
 #include <malloc.h>
 #include <string.h>
 #include <ctype.h>
-#define MAX_LINE 25
+#define MAX_LINE 1024
 
 struct Lista;
 typedef struct Lista* lista;
