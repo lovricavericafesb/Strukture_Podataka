@@ -18,14 +18,14 @@ typedef struct Stog {
 	Pozicija next;
 }Stog;
 
-int menu(Cvor);
-Cvor CreateRootStablo(Cvor , char*);
+int menu(Cvor, Pozicija, Pozicija, Pozicija);
+Cvor CreateRootStablo(Cvor, char*);
 int CreateElementStablo(Cvor);
 Pozicija CreateStogHead(Pozicija, char*);
 int CreateStogElement(Pozicija, Cvor);
 int ispis(Cvor);
 Cvor TraziPoImenu(Cvor, char*);
-Cvor VratiUnazad(Pozicija);
+Cvor VratiUnazad(Pozicija, Pozicija);
 int StaviNaStog(Cvor);
 
 int main()
@@ -39,26 +39,33 @@ int main()
 	head_stog->next = NULL;
 	head_stog->pokazivac_stablo = NULL;
 
+	Pozicija currentDirectory;
+	currentDirectory = (Pozicija)malloc(sizeof(Stog));
+	currentDirectory->next = head_stog->next;
+	currentDirectory->pokazivac_stablo = root;
+	head_stog->next = currentDirectory;
+
+	Pozicija root_stog;
+	root_stog = (Pozicija)malloc(sizeof(Stog));
+	root_stog->next = head_stog->next;
+	head_stog->next = root_stog;
+	root_stog->pokazivac_stablo = root;
 
 	int odluka = 1;
 
 	do
 	{
-		odluka = menu(root, head_stog);
+		odluka = menu(root, head_stog, currentDirectory, root_stog);
 	} while (odluka);
 
 
 	return 0;
 }
 
-int menu(Cvor root, Pozicija head)
+int menu(Cvor root, Pozicija head, Pozicija currentDirectory, Pozicija root_stog)
 {
 	char izbor[MAX_NAME];
-	Pozicija temp;
-	temp = (Pozicija)malloc(sizeof(Stog));
-	temp->next = head->next;
-	temp->pokazivac_stablo = root;
-	head->next = temp;
+	
 	char* name;
 	name = (char*)malloc(MAX_NAME * sizeof(char));
 
@@ -72,24 +79,24 @@ int menu(Cvor root, Pozicija head)
 
 	if (strcmp(izbor, "dir") == 0)
 	{
-		ispis(temp->pokazivac_stablo);
+		ispis(currentDirectory->pokazivac_stablo);
 		return 1;
 	}
 	else if (strcmp(izbor, "cd") == 0)
 	{
-		
+
 		printf("Unesite ime direktorija: ");
 		scanf("%s", name);
-		temp->pokazivac_stablo = TraziPoImenu(temp->pokazivac_stablo, name);
-		printf("\nOtvorili ste %s direktorij\n", temp->pokazivac_stablo->name_stablo);
-		CreateStogElement(head, temp->pokazivac_stablo);
-		ispis(temp->pokazivac_stablo);
+		currentDirectory->pokazivac_stablo = TraziPoImenu(currentDirectory->pokazivac_stablo, name);
+		printf("\nOtvorili ste %s direktorij\n", currentDirectory->pokazivac_stablo->name_stablo);
+		CreateStogElement(head, currentDirectory->pokazivac_stablo);
+		ispis(currentDirectory->pokazivac_stablo);
 		return 1;
 	}
 	else if (strcmp(izbor, "md") == 0)
 	{
-		
-		CreateElementStablo(temp->pokazivac_stablo);
+
+		CreateElementStablo(currentDirectory->pokazivac_stablo);
 
 		return 1;
 	}
@@ -98,7 +105,7 @@ int menu(Cvor root, Pozicija head)
 		return 0;
 	}
 	else if (strcmp(izbor, "cd..") == 0) {
-		temp->pokazivac_stablo = VratiUnazad(head);
+		currentDirectory->pokazivac_stablo = VratiUnazad(head, root_stog);
 		return 1;
 	}
 	else {
@@ -113,7 +120,7 @@ Cvor CreateRootStablo(Cvor root, char* name)
 	root->sibling = NULL;
 	root->child = NULL;
 	strcpy(root->name_stablo, name);
-	
+
 
 	return root;
 }
@@ -129,7 +136,7 @@ int CreateElementStablo(Cvor ParentElement)
 		new_element->child = NULL;
 		new_element->sibling = NULL;
 		printf("\nUnesite ime novog direktorija: ");
-		scanf("%s", new_element->name_stablo);
+		scanf(" %s", new_element->name_stablo);
 
 		return 0;
 	}
@@ -140,12 +147,12 @@ int CreateElementStablo(Cvor ParentElement)
 			temp = temp->sibling;
 		Cvor new_element;
 		new_element = (Cvor)malloc(sizeof(Stablo));
-		temp->sibling = new_element;
+		new_element->sibling = temp->sibling;
 		new_element->child = NULL;
-		new_element->sibling = NULL;
+		temp->sibling = new_element;
 		printf("\nUnesite ime novog direktorija: ");
 		scanf("%s", new_element->name_stablo);
-		free(temp);
+		//free(temp);
 
 		return 0;
 	}
@@ -174,8 +181,7 @@ int ispis(Cvor Parent)
 		printf("\nU %s direktoriju se nalaze sljedece datoteke: ", Parent->name_stablo);
 		while (temp != NULL)
 		{
-			int i = 1;
-			printf("\n\t%d. %s", i, temp->name_stablo);
+			printf("\n\t- %s", temp->name_stablo);
 			temp = temp->sibling;
 		}
 		printf("\n");
@@ -203,19 +209,18 @@ Cvor TraziPoImenu(Cvor parent, char* name)
 		}
 	}
 }
-Cvor VratiUnazad(Pozicija head)
+Cvor VratiUnazad(Pozicija head, Pozicija root_stog)
 {
-	if (head->next == NULL)
+	if (head->next == root_stog)
 	{
 		printf("\nNalazite se u osnovnom direktoriju i nije moguce iz njega izaci!\n");
-		return 0;
+		return head->next->pokazivac_stablo;
 	}
 	else {
 		Pozicija q = head->next;
 		head->next = head->next->next;
-
 		free(q);
-		printf("\nSada ste u %s direktoriju\n", head->next->pokazivac_stablo->name_stablo);
+		printf("\nSada ste u %s direktoriju!\n", head->next->pokazivac_stablo->name_stablo);
 		return head->next->pokazivac_stablo;
 	}
 }
