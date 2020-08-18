@@ -119,27 +119,27 @@ const char* readFile(char *fileName) {
 	buffer = (char*)malloc(sizeof(char)*BUFFER);
 	if (buffer == NULL) {
 		printf("Memory not properly allocated for buffer in readFile!");
-		exit(SUCCESS);
+		return NULL;
 	}
 	memset(buffer, '\0', BUFFER);
 
 	if (fileName == NULL)
 	{
 		printf("File name can not be NULL!\n");
-		exit(SUCCESS);
+		return NULL;
 	}
 
 	if (strlen(fileName) == 0)
 	{
 		printf("File can't be an empty string!\n");
-		exit(SUCCESS);
+		return NULL;
 	}
 
 	fp = fopen(fileName, "r");
 	if (fp == NULL)
 	{
 		printf("File didn't open! -> %s", fileName);
-		exit(SUCCESS);
+		return NULL;
 	}
 	while (!feof(fp)) {
 		memset(buffer, 0, BUFFER);
