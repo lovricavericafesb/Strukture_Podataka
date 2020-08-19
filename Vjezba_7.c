@@ -57,7 +57,7 @@ int main(void) {
 	system("pause");
 }
 
-float resultPostfix(Nod _stog, char* buffer) {
+float resultPostfix(Position S, char* buffer) {
 	float result = 0;
 	float number = 0;
 	float operand1 = 0;
@@ -65,50 +65,49 @@ float resultPostfix(Nod _stog, char* buffer) {
 	int howManyBytes = 0;
 	char *p = buffer;
 	while (p) {
-		if (sscanf(p, " %f %n", &number, &howManyBytes) == 1) {
-			PushStog(_stog, number);
-			p += howManyBytes;
+		if (sscanf(p, " %f %n", &number, &howManyBytes) == 1) {//čita znak po znak i priskače space, ako dođemo na broj zapiše ga u float a dužinu u howManyBytes
+			PushStog(S, number); //to radi jer je u float učitao cijeli broj(koliko god znamenki imao) a s uvjetmo ==1 sscanf se prekida kada se učita 1 element
+			p += howManyBytes;//znači howManyBytes predstavlja dužinu učitanog broja jer se space priskače, s njim možemo inkrementirati buffer p, tj. šetat kroz file za howManyBtyes koraka
 		}
-		else if (strcmp(p, "+") == 0) {
-			PopStog(_stog, &operand1);
-			PopStog(_stog, &operand2);
+		else if (strncmp(p, "+", 1) == 0) {
+			PopStog(S, &operand1);
+			PopStog(S, &operand2);
 			result = operand1 + operand2;
-			PushStog(_stog, result);
-			p++;
+			PushStog(S, result);
+			p+=2;
 		}
-		else if (strcmp(p, "-") == 0) {
-			PopStog(_stog, &operand1);
-			PopStog(_stog, &operand2);
+		else if (strncmp(p, "-", 1) == 0) {
+			PopStog(S, &operand1);
+			PopStog(S, &operand2);
 			result = operand1 - operand2;
-			PushStog(_stog, result);
-			p++;
+			PushStog(S, result);
+			p += 2;
 		}
-		else if (strcmp(p, "*") == 0) {
-			PopStog(_stog, &operand1);
-			PopStog(_stog, &operand2);
+		else if (strncmp(p, "*", 1) == 0) {
+			PopStog(S, &operand1);
+			PopStog(S, &operand2);
 			result = operand1 * operand2;
-			PushStog(_stog, result);
-			p++;
+			PushStog(S, result);
+			p += 2;
 		}
-		else if (strcmp(p, "/") == 0) {
-			PopStog(_stog, &operand1);
-			PopStog(_stog, &operand2);
-			if (operand2 < 0) {
-				printf("/n/t Dividing with zero is not allowed!");
+		else if (strncmp(p, "/", 1) == 0) {
+			PopStog(S, &operand1);
+			PopStog(S, &operand2);
+			if (operand1 < 0) {
+				printf("\r\tDividing with zero is not allowed");
 				return ERROR;
 			}
 			else {
 				result = operand1 / operand2;
-				PushStog(_stog, result);
-				p++;
+				PushStog(S, result);
+				p += 2;
 			}
 		}
 		else {
 			break;
 		}
-		
 	}
-	printf("/n/tThe result of the Postfix calculation is: %0.2f/n", _stog->Next->element);
+	printf("\t\rThe result of the Postfix calculation is: %0.2f \n", S->Next->element);
 	return SUCCESS;
 }
 
